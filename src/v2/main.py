@@ -30,6 +30,7 @@ class DashboardOrder(BaseModel):
     abertura: str
     hora: str
     tipo: str
+    id_funcionario: Optional[int]
     funcionario: str
     descricao: str
     agendamento: Optional[str]
@@ -201,35 +202,52 @@ async def create_single_os_map(os_id: int):
     return await _create_kml_file([order_data], f"order_{os_id}.kml")
 
 # --- LÓGICA V2: Dashboard Backend ---
-async def get_filtered_support_orders(tipo_filtro: Optional[str] = None, data_filtro: Optional[str] = None):
+async def get_filtered_support_orders(tipo_filtro: Optional[str] = None, data_filtro: Optional[str] = None, id_funcionario_filtro: Optional[int] = None,
+):
     payload = {"campo1": "h_fechamento", "campo1_valor": ""}
     response = await vigo_request("POST", "/api/app_getcustom", payload)
     if response.status_code != 200: return []
     
     raw_data = response.json()
     ALLOWED_TYPES = ["Suporte (rádio/fibra)", "Suporte Rural", "Help Desk", "Retirada (fibra/rádio)"]
-    ALLOWED_CITY = ["Catalão"]
-    
+    ALLOWED_CITY = ["Catalão", "CATALÃO"]
+    ALLOWED_EMPLOYEES = {188, 167, 111, 130, 162, 110}
+
     types_to_filter = [tipo_filtro] if tipo_filtro in ALLOWED_TYPES else ALLOWED_TYPES
+    employee_to_filter = id_funcionario_filtro if id_funcionario_filtro in ALLOWED_EMPLOYEES else None
     
     structured_orders = []
     for item in raw_data:
+        try:
+            item_employee_id = int(item.get("id_funcionario") or 0)
+        except (TypeError, ValueError):
+            item_employee_id = None
+
         if item.get("desc_tatendimento") not in types_to_filter: continue
         if item.get("cidade") not in ALLOWED_CITY: continue
         if data_filtro and (not item.get("dt_agendamento") or data_filtro not in item.get("dt_agendamento")): continue
+        if employee_to_filter and item_employee_id != employee_to_filter: continue
         
         structured_orders.append(DashboardOrder(
             os_id=item.get("id"), cli_id=item.get("id_cliente"), cli_name=item.get("nome"),
             bairro=item.get("bairro", "N/A"), cidade=item.get("cidade"), abertura=item.get("dt_abertura", ""),
             hora=item.get("h_abertura", ""), tipo=item.get("desc_tatendimento", ""),
-            funcionario=item.get("desc_funcionario", ""), descricao=item.get("descricao", ""),
+            id_funcionario=item_employee_id, funcionario=item.get("desc_funcionario", ""), descricao=item.get("descricao", ""),
             agendamento=item.get("dt_agendamento"), valor=float(item.get("valor", 0))
         ))
     return structured_orders
 
 @app.get("/api/dashboard/orders", response_model=List[DashboardOrder])
-async def dashboard_orders(tipo: Optional[str] = Query(None), data: Optional[str] = Query(None)):
-    orders = await get_filtered_support_orders(tipo_filtro=tipo, data_filtro=data)
+async def dashboard_orders(
+    tipo: Optional[str] = Query(None),
+    data: Optional[str] = Query(None),
+    id_funcionario: Optional[int] = Query(None),
+):
+    orders = await get_filtered_support_orders(
+        tipo_filtro=tipo,
+        data_filtro=data,
+        id_funcionario_filtro=id_funcionario,
+    )
     if not orders: raise HTTPException(status_code=404, detail="Nenhuma OS encontrada.")
     return orders
 

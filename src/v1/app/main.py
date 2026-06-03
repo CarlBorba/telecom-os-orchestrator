@@ -139,7 +139,7 @@ async def fetch_order_by_filter(cidade: str = "Catalão", tipo: str = "Suporte (
                 "cli_loc": o["anotacao_tecnica"],
                 "cli_address": "",
                 "order_desc": o["historico"]
-            } for o in orders if o.get('cidade') == cidade and o.get('desc_tatendimento') == tipo
+            } for o in orders if o.get('cidade') == cidade.casefold and o.get('desc_tatendimento') == tipo
         ]
     raise HTTPException(status_code=response.status_code, detail="Filter API Error")
 

@@ -13,4 +13,4 @@ COPY . .
 
 EXPOSE 8009
 
-CMD ["uvicorn", "src.v2.main:app", "--host", "0.0.0.0", "--port", "8009"]
+CMD ["uvicorn", "src.v3.main:app", "--host", "0.0.0.0", "--port", "8009"]
