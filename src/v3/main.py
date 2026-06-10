@@ -214,7 +214,7 @@ async def get_filtered_support_orders(tipo_filtro: Optional[str] = None, data_fi
     raw_data = response.json()
     ALLOWED_TYPES = ["Suporte (rádio/fibra)", "Suporte Rural", "Help Desk", "Retirada (fibra/rádio)", "Instalação (fibra/rádio)", "Infraestrutura", "Mudança de Endereço / Migração (rádio/fibra)"]
     ALLOWED_CITY = ["Catalão", "CATALÃO"]
-    ALLOWED_EMPLOYEES = {188, 167, 111, 130, 162, 110}
+    ALLOWED_EMPLOYEES = {188, 190, 111, 130, 162, 110}
 
     types_to_filter = [tipo_filtro] if tipo_filtro in ALLOWED_TYPES else ALLOWED_TYPES
     employee_to_filter = id_funcionario_filtro if id_funcionario_filtro in ALLOWED_EMPLOYEES else None

@@ -73,7 +73,7 @@
                 <select id="tecnico-filtro" class="bg-gray-800 text-white border border-gray-600 text-sm rounded-lg p-2">
                     <option value="">Todos os Técnicos</option>
                     <option value="188">188 - Dynhonatan Ribeiro Dias</option>
-                    <option value="167">167 - Flavio Eduardo da Silva</option>
+                    <option value="190">190 - Josiran Pinheiro Martins</option>
                     <option value="111">111 - Sindomar Antônio Rodrigues dos Santos Júnior</option>
                     <option value="130">130 - Alex Cândido da Silva</option>
                     <option value="162">162 - Danilo Rodrigues Pereira</option>
@@ -97,6 +97,16 @@
         function formatDate(dateString) {
             if (!dateString) return 'S/Data';
             try { return new Date(dateString).toLocaleDateString('pt-BR'); } catch (e) { return dateString; }
+        }
+
+        function toggleStatus(btn) {
+            if (btn.innerText === 'Agendado') {
+                btn.innerText = 'Em atendimento';
+                btn.className = 'ml-4 bg-blue-700 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs transition border border-blue-500 font-bold';
+            } else {
+                btn.innerText = 'Agendado';
+                btn.className = 'ml-4 bg-green-800 hover:bg-green-600 text-white px-3 py-1 rounded text-xs transition border border-green-500 font-bold';
+            }
         }
 
         async function toggleDetails(index, cli_id) {
@@ -170,6 +180,9 @@
                             <div class="flex items-center gap-4">
                                 <span>Agenda: ${formatDate(os.agendamento)}</span>
                                 <span class="text-green-400 font-bold">R$ ${os.valor.toFixed(2)}</span>
+                                <button onclick="toggleStatus(this)" class="ml-4 bg-green-800 hover:bg-green-600 text-white px-3 py-1 rounded text-xs transition border border-green-500 font-bold">
+                                    Agendado
+                                </button>
                                 <button onclick="toggleDetails(${index}, ${os.cli_id})" class="ml-2 bg-green-800 hover:bg-green-600 text-white px-3 py-1 rounded text-xs transition border border-green-500">
                                     + Detalhes
                                 </button>
